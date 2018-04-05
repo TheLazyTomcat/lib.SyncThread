@@ -37,8 +37,6 @@
          timeout runs out it will return.
          
   WARNING - Synchronizing a thread with itself will cause a deadlock!
-            Any error/exception in the synchronized method is raised in the
-            context of thread it is synchronized with!
 
   Dependencies:
     Messanger   - github.com/ncs-sniper/Lib.Messanger
@@ -158,15 +156,23 @@ end;
 //------------------------------------------------------------------------------
 
 procedure TSyncThreadDispatcher.Synchronize(Method: TThreadMethod);
+var
+  SyncException:  Exception;
 begin
 {
-  clean-up any received messages - the dispatcher is not supposed receive any
-  message, so there is no point in processing them
+  clean-up any received messages - the dispatcher is not supposed to receive
+  any message, so there is no point in processing them
 }
 fEndpoint.TraverseMessages;
+SyncException := nil;
 // following line will wait for the sent message to be processed
 fEndpoint.SendMessageAndWait(ST_SYNC_ENDPOINT_ID,ST_SYNC_MESSAGE_ID,
-  {%H-}TMSGRParam(TMethod(Method).Code),{%H-}TMSGRParam(TMethod(Method).Data),0);
+                             {%H-}TMSGRParam(TMethod(Method).Code),
+                             {%H-}TMSGRParam(TMethod(Method).Data),
+                             {%H-}TMSGRParam(@SyncException));
+// check if exception occurred, and if so, raise it
+If Assigned(SyncException) then
+  raise SyncException;
 end;
 
 
@@ -192,7 +198,11 @@ If (Msg.Parameter1 = ST_SYNC_MESSAGE_ID) and (mdfSynchronousMessage in Flags) th
     Method.Code := {%H-}Pointer(Msg.Parameter2);
     Method.Data := {%H-}Pointer(Msg.Parameter3);
     // execute the method in current context
-    TThreadMethod(Method);
+    try
+      TThreadMethod(Method);
+    except
+      {%H-}PPointer(Msg.Parameter4)^ := AcquireExceptionObject;
+    end;
   end;
 end;
 
