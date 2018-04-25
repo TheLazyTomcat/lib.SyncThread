@@ -51,6 +51,7 @@ unit SyncThread;
 {$IFDEF FPC}
   {$MODE ObjFPC}{$H+}
   {$MODESWITCH CLASSICPROCVARS+}
+  {$DEFINE FPC_DisableWarns}
 {$ENDIF}
 
 interface
@@ -118,6 +119,10 @@ implementation
 uses
   SysUtils;
 
+{$IFDEF FPC_DisableWarns}
+  {$WARN 4055 OFF} // Conversion between ordinals and pointers is not portable
+{$ENDIF}
+
 {===============================================================================
     Private constants
 ===============================================================================}
@@ -167,9 +172,9 @@ fEndpoint.TraverseMessages;
 SyncException := nil;
 // following line will wait for the sent message to be processed
 fEndpoint.SendMessageAndWait(ST_SYNC_ENDPOINT_ID,ST_SYNC_MESSAGE_ID,
-                             {%H-}TMSGRParam(TMethod(Method).Code),
-                             {%H-}TMSGRParam(TMethod(Method).Data),
-                             {%H-}TMSGRParam(@SyncException));
+                             TMSGRParam(TMethod(Method).Code),
+                             TMSGRParam(TMethod(Method).Data),
+                             TMSGRParam(@SyncException));
 // check if exception occurred, and if so, raise it
 If Assigned(SyncException) then
   raise SyncException;
@@ -195,13 +200,13 @@ begin
 If (Msg.Parameter1 = ST_SYNC_MESSAGE_ID) and (mdfSynchronousMessage in Flags) then
   begin
     // get code and data of the synchronized method from message params
-    Method.Code := {%H-}Pointer(Msg.Parameter2);
-    Method.Data := {%H-}Pointer(Msg.Parameter3);
+    Method.Code := Pointer(Msg.Parameter2);
+    Method.Data := Pointer(Msg.Parameter3);
     // execute the method in current context
     try
       TThreadMethod(Method);
     except
-      {%H-}PPointer(Msg.Parameter4)^ := AcquireExceptionObject;
+      PPointer(Msg.Parameter4)^ := AcquireExceptionObject;
     end;
   end;
 end;
