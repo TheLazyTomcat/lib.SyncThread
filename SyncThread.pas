@@ -41,6 +41,7 @@
   Dependencies:
     Messanger   - github.com/ncs-sniper/Lib.Messanger
     AuxTypes    - github.com/ncs-sniper/Lib.AuxTypes
+    AuxClasses  - github.com/ncs-sniper/Lib.AuxClasses
     MemVector   - github.com/ncs-sniper/Lib.MemVector
     WinSyncObjs - github.com/ncs-sniper/Lib.WinSyncObjs
     StrRect     - github.com/ncs-sniper/Lib.StrRect
@@ -121,6 +122,7 @@ uses
 
 {$IFDEF FPC_DisableWarns}
   {$WARN 4055 OFF} // Conversion between ordinals and pointers is not portable
+  {$WARN 5024 OFF} // Parameter "$1" not used
 {$ENDIF}
 
 {===============================================================================
