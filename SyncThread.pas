@@ -53,6 +53,7 @@ unit SyncThread;
   {$MODE ObjFPC}{$H+}
   {$MODESWITCH CLASSICPROCVARS+}
   {$DEFINE FPC_DisableWarns}
+  {$MACRO ON}
 {$ENDIF}
 
 interface
@@ -121,8 +122,9 @@ uses
   SysUtils;
 
 {$IFDEF FPC_DisableWarns}
-  {$WARN 4055 OFF} // Conversion between ordinals and pointers is not portable
-  {$WARN 5024 OFF} // Parameter "$1" not used
+  {$DEFINE FPCDWM}
+  {$DEFINE W4055:={$WARN 4055 OFF}} // Conversion between ordinals and pointers is not portable
+  {$DEFINE W5024:={$WARN 5024 OFF}} // Parameter "$1" not used
 {$ENDIF}
 
 {===============================================================================
@@ -173,10 +175,12 @@ begin
 fEndpoint.TraverseMessages;
 SyncException := nil;
 // following line will wait for the sent message to be processed
+{$IFDEF FPCDWM}{$PUSH}W4055{$ENDIF}
 fEndpoint.SendMessageAndWait(ST_SYNC_ENDPOINT_ID,ST_SYNC_MESSAGE_ID,
                              TMSGRParam(TMethod(Method).Code),
                              TMSGRParam(TMethod(Method).Data),
                              TMSGRParam(@SyncException));
+{$IFDEF FPCDWM}{$POP}{$ENDIF}
 // check if exception occurred, and if so, raise it
 If Assigned(SyncException) then
   raise SyncException;
@@ -195,6 +199,7 @@ end;
     TSyncThreadSynchronizer - protected methods
 -------------------------------------------------------------------------------}
 
+{$IFDEF FPCDWM}{$PUSH}W4055 W5024{$ENDIF}
 procedure TSyncThreadSynchronizer.EndpointMessageHandler(Sender: TObject; Msg: TMsgrMessage; var Flags: TMsgrDispatchFlags);
 var
   Method: TMethod;
@@ -212,6 +217,7 @@ If (Msg.Parameter1 = ST_SYNC_MESSAGE_ID) and (mdfSynchronousMessage in Flags) th
     end;
   end;
 end;
+{$IFDEF FPCDWM}{$POP}{$ENDIF}
 
 {-------------------------------------------------------------------------------
     TSyncThreadSynchronizer - public methods
