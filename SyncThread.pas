@@ -38,7 +38,7 @@
     
   Version 2.0 (2022-09-11)
 
-  Last change 2022-09-11
+  Last change 2022-09-24
 
   ©2018-2022 František Milt
 
@@ -67,6 +67,7 @@
   * LinSyncObjs        - github.com/TheLazyTomcat/Lib.LinSyncObjs
     ListSorters        - github.com/TheLazyTomcat/Lib.ListSorters
     MemVector          - github.com/TheLazyTomcat/Lib.MemVector
+    Messanger          - github.com/TheLazyTomcat/Lib.Messanger
     NamedSharedItems   - github.com/TheLazyTomcat/Lib.NamedSharedItems
     SHA1               - github.com/TheLazyTomcat/Lib.SHA1  
     SharedMemoryStream - github.com/TheLazyTomcat/Lib.SharedMemoryStream    
